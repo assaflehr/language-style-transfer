@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import ipdb
+#import ipdb
 import random
 import numpy as np
 import tensorflow as tf
