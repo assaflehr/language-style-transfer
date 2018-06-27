@@ -4,6 +4,13 @@ from utils import strip_eos
 from copy import deepcopy
 
 class BeamState(object):
+    """
+        Beam search (should) keep K best results of the decoder for each timestamp, and use them as input
+        to the next word (so we are running decoder once, keep K highest words. Then running the decoder 5 different
+        times and get 5 results for each. To not explode, we keep the best 5 pairs (w1,w2) of the 25 results .
+        if they are inside more than one decoder, it is not clear whether we keep the decoders alive with thier states
+        or not.... need to look up
+    """
     def __init__(self, h, inp, sent, nll):
         self.h, self.inp, self.sent, self.nll = h, inp, sent, nll
 

@@ -10,6 +10,12 @@ def load_doc(path):
     return data
 
 def load_sent(path, max_size=-1):
+    """
+    load lines from file up to max_size lines
+    :param path:
+    :param max_size:
+    :return:
+    """
     data = []
     with open(path) as f:
         for line in f:

@@ -6,6 +6,12 @@ from collections import Counter
 
 class Vocabulary(object):
     def __init__(self, vocab_file, emb_file='', dim_emb=0):
+        """
+        load vocab and either use random embeddings , or load them from file
+        :param vocab_file:
+        :param emb_file:
+        :param dim_emb:
+        """
         with open(vocab_file, 'rb') as f:
             self.size, self.word2id, self.id2word = pickle.load(f)
         self.dim_emb = dim_emb
@@ -26,6 +32,14 @@ class Vocabulary(object):
             self.embedding[i] /= LA.norm(self.embedding[i])
 
 def build_vocab(data, path, min_occur=5):
+    """
+    build a tuple (vocab_size, word2id, id2word) and pickle it to path
+    vocab_size is an int word2id is a dictionary. id2word is a list.
+    :param data:
+    :param path:
+    :param min_occur:
+    :return: None
+    """
     word2id = {'<pad>':0, '<go>':1, '<eos>':2, '<unk>':3}
     id2word = ['<pad>', '<go>', '<eos>', '<unk>']
 

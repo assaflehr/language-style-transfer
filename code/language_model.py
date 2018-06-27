@@ -133,7 +133,7 @@ if __name__ == '__main__':
         test = load_sent(args.test)
 
     config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
+    config.gpu_options.allow_growth = True  #allocate only as much GPU memory based on runtime allocations: it starts out allocating very little memory
     with tf.Session(config=config) as sess:
         model = create_model(sess, args, vocab)
         if args.train:
