@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
-import cPickle as pickle
+#import cPickle as pickle  #no need in python3
+import pickle
 import random
 from collections import Counter
 
@@ -19,7 +20,7 @@ class Vocabulary(object):
             (self.size, self.dim_emb)) - 0.5
 
         if emb_file:
-            print 'Loading word vectors from', emb_file
+            print ('Loading word vectors from', emb_file)
             with open(emb_file) as f:
                 for line in f:
                     parts = line.split()
