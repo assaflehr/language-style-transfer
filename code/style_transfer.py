@@ -2,8 +2,6 @@ import os
 import sys
 import time
 
-import tensorflow as tf
-
 import beam_search
 import greedy_decoding
 from accumulator import Accumulator
@@ -16,8 +14,8 @@ from vocab import Vocabulary, build_vocab
 
 class Model(object):
     def __init__(self, args, vocab):
-        dim_y = args.dim_y
-        dim_z = args.dim_z
+        dim_y = args.dim_y  # style-embedding
+        dim_z = args.dim_z  # semantic embedding
         dim_h = dim_y + dim_z
         dim_emb = args.dim_emb
         n_layers = args.n_layers
@@ -27,31 +25,23 @@ class Model(object):
         beta1, beta2 = 0.5, 0.999
         grad_clip = 30.0
 
-        self.dropout = tf.placeholder(tf.float32,
-                                      name='dropout')
-        self.learning_rate = tf.placeholder(tf.float32,
-                                            name='learning_rate')
+        self.dropout = tf.placeholder(tf.float32, name='dropout')
+        self.learning_rate = tf.placeholder(tf.float32, name='learning_rate')
         self.rho = tf.placeholder(tf.float32, name='rho')
-        self.gamma = tf.placeholder(tf.float32,
-                                    name='gamma')
+        self.gamma = tf.placeholder(tf.float32, name='gamma')
 
         self.batch_len = tf.placeholder(tf.int32, name='batch_len')
-        self.batch_size = tf.placeholder(tf.int32,
-                                         name='batch_size')
+        self.batch_size = tf.placeholder(tf.int32, name='batch_size')
         self.enc_inputs = tf.placeholder(tf.int32, [None, None],  # size * len
                                          name='enc_inputs')
         self.dec_inputs = tf.placeholder(tf.int32, [None, None], name='dec_inputs')
-        self.targets = tf.placeholder(tf.int32, [None, None],
-                                      name='targets')
-        self.weights = tf.placeholder(tf.float32, [None, None],
-                                      name='weights')
-        self.labels = tf.placeholder(tf.float32, [None],
-                                     name='labels')
+        self.targets = tf.placeholder(tf.int32, [None, None], name='targets')
+        self.weights = tf.placeholder(tf.float32, [None, None], name='weights')
+        self.labels = tf.placeholder(tf.float32, [None], name='labels')
 
         labels = tf.reshape(self.labels, [-1, 1])
 
-        embedding = tf.get_variable('embedding',
-                                    initializer=vocab.embedding.astype(np.float32))
+        embedding = tf.get_variable('embedding', initializer=vocab.embedding.astype(np.float32))
         with tf.variable_scope('projection'):
             proj_W = tf.get_variable('W', [dim_h, vocab.size])
             proj_b = tf.get_variable('b', [vocab.size])
@@ -71,14 +61,11 @@ class Model(object):
         # _, z = tf.nn.dynamic_rnn(cell_e, enc_inputs,
         #    dtype=tf.float32, scope='encoder')
 
-        self.h_ori = tf.concat([linear(labels, dim_y,
-                                       scope='generator'), z], 1)
-        self.h_tsf = tf.concat([linear(1 - labels, dim_y,
-                                       scope='generator', reuse=True), z], 1)
+        self.h_ori = tf.concat([linear(labels, dim_y, scope='generator'), z], 1)
+        self.h_tsf = tf.concat([linear(1 - labels, dim_y, scope='generator', reuse=True), z], 1)
 
         cell_g = create_cell(dim_h, n_layers, self.dropout)
-        g_outputs, _ = tf.nn.dynamic_rnn(cell_g, dec_inputs,
-                                         initial_state=self.h_ori, scope='generator')
+        g_outputs, _ = tf.nn.dynamic_rnn(cell_g, dec_inputs, initial_state=self.h_ori, scope='generator')
 
         # attach h0 in the front
         teach_h = tf.concat([tf.expand_dims(self.h_ori, 1), g_outputs], 1)

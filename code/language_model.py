@@ -31,7 +31,7 @@ class Model(object):
 
         inputs = tf.nn.embedding_lookup(embedding, self.inputs)
         cell = create_cell(dim_z, n_layers, self.dropout)
-        outputs, _ = tf.nn.dynamic_rnn(cell, inputs,                                       dtype=tf.float32, scope='language_model')
+        outputs, _ = tf.nn.dynamic_rnn(cell, inputs,   dtype=tf.float32, scope='language_model')
         outputs = tf.nn.dropout(outputs, self.dropout)
         outputs = tf.reshape(outputs, [-1, dim_z])
         self.logits = tf.matmul(outputs, proj_W) + proj_b
@@ -109,7 +109,11 @@ def evaluate(sess, args, vocab, model, x):
 
 
 if __name__ == '__main__':
-    # example run: --train ../data/yelp/sentiment.train.0 --dev ../data/yelp/sentiment.dev.0 --output ../tmp/sentiment.dev.0 --vocab ../tmp/yelp.vocab --model ../tmp/model
+    # example run
+    # train: --train ../data/yelp/sentiment.train.0 --dev ../data/yelp/sentiment.dev.0 --output ../tmp/sentiment.dev.0 --vocab ../tmp/yelp.vocab --model ../tmp/model
+    # training without GPU is insanly slow. step 1000 baches, time 808s VS 33s  (x24.5) meaning 20epocs of 2750 batches each can take 0.5 hour on GPU, and more than 12 hours on CPU.
+    # see running GPU on colab here: https://colab.research.google.com/drive/1h353cRWEwvURfUpl-ikjLgUtP4rr7HfT#scrollTo=-hppJmqPKYH4
+    # test: --test ../data/yelp/sentiment.dev.0 --output ../tmp/sentiment.dev.0 --vocab ../tmp/yelp.vocab --model ../tmp/model --load_model true
     args = load_arguments()
 
     if args.train:
